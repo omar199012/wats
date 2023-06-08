@@ -1,0 +1,41 @@
+const qrcode = require('qrcode-terminal');
+const { Client } = require('whatsapp-web.js');
+const express = require('express');
+
+const app = express();
+const port = 3000;
+
+const client = new Client();
+
+client.on('qr', (qr) => {
+    qrcode.generate(qr, { small: true });
+    console.log('Scan the QR code above with your phone to log in.');
+});
+
+client.on('ready', () => {
+    console.log('Client is ready!');
+});
+
+client.on('message', async (message) => {
+    if (message.body === '1') {
+        await message.reply('خدماتنا:\n- خدمة 1\n- خدمة 2\n- خدمة 3');
+    } else if (message.body === '2') {
+        await message.reply('عروضنا:\n- عرض 1\n- عرض 2\n- عرض 3');
+    } else if (message.body === '3') {
+        await message.reply('موقعنا على الإنترنت: www.example.com');
+    } else {
+        await message.reply('مرحباً بك في مركز البرء.\nيرجى اختيار واحدة من الخيارات التالية:\n1- خدماتنا\n2- عروضنا\n3- موقعنا');
+    }
+});
+
+app.get('/qr_code', (req, res) => {
+    client.generateQR().then((qrCode) => {
+        res.send(`<img src="${qrCode}" />`);
+    });
+});
+
+app.listen(port, () => {
+    console.log(`Server is running on port ${port}`);
+});
+
+client.initialize();
